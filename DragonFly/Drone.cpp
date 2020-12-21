@@ -52,10 +52,6 @@ void Drone::setMotorSpeeds(float arg1,float arg2, float arg3, float arg4){
     motor4.writeMicroseconds(temp4);
 }
 
-Quaternion Drone::getAngle(void){
-    
-    
-}
 
 void Drone::controlManually(void){
     if (Serial.available() > 0) {

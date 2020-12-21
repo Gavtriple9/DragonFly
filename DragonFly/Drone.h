@@ -11,7 +11,7 @@ private:
     Servo motor3;
     Servo motor4;
 
-    Quaternion angle;
+    
 
     int minSPM1 = 1000;
     int minSPM2 = 1000;
@@ -26,7 +26,6 @@ private:
 public:
     Drone();
 
-    Quaternion getAngle(void);
 
     void setMinSPM1(int arg1){ minSPM1 = arg1; }
     void setMinSPM2(int arg1){ minSPM2 = arg1; }
