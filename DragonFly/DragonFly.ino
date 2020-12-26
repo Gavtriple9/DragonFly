@@ -1,12 +1,26 @@
 #define INTERRUPT_PIN 2
 #define WAIT_TIME 100
 #define PI 3.141592653589793284
-#define OUTPUT_READABLE_QUATERNION
+#define TIME_OUT_DURATION 1000
 
-#include <Wire.h>
+#define CH1_PIN 3
+#define CH2_PIN 5
+#define CH3_PIN 6
+#define CH4_PIN 9
+#define CH5_PIN 10
+#define CH6_PIN 11
+
+//#define OUTPUT_READABLE_QUATERNION
+
+// Standard Libraries
 #include <Vector.h>
 #include <Arduino.h>
 
+// PID Library
+#include <PID_v1.h>
+
+// MPU Libraries
+#include <Wire.h>
 #include "MPU6050_6Axis_MotionApps20.h"
 #include "MPU6050.h"
 
@@ -21,53 +35,51 @@ uint16_t fifoCount;     // count of all bytes currently in FIFO
 uint8_t fifoBuffer[64]; // FIFO storage buffer
 
 // orientation/motion vars
-Quaternion q;        // [w, x, y, z]         quaternion container
-VectorInt16 aa;      // [x, y, z]            accel sensor measurements
-VectorInt16 aaReal;  // [x, y, z]            gravity-free accel sensor measurements
-VectorInt16 aaWorld; // [x, y, z]            world-frame accel sensor measurements
-VectorFloat gravity; // [x, y, z]            gravity vector
-float euler[3];      // [psi, theta, phi]    Euler angle container
-float ypr[3];        // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
+Quaternion q = Quaternion(1, 0, 0, 0); // [w, x, y, z]         quaternion container
+VectorInt16 aa;                        // [x, y, z]            accel sensor measurements
+VectorInt16 aaReal;                    // [x, y, z]            gravity-free accel sensor measurements
+VectorInt16 aaWorld;                   // [x, y, z]            world-frame accel sensor measurements
+VectorFloat gravity;                   // [x, y, z]            gravity vector
+float euler[3];                        // [psi, theta, phi]    Euler angle container
+float ypr[3];                          // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
 
 volatile bool mpuInterrupt = false; // indicates whether MPU interrupt pin has gone high
 
-int16_t xAccel = 0;
-int16_t yAccel = 0;
-int16_t zAccel = 0;
+unsigned long timeBeforeLoop;
 
-int16_t xGyro = 0;
-int16_t yGyro = 0;
-int16_t zGyro = 0;
+float yaw = 0.0f;
+float pitch = 0.0f;
+float roll = 0.0f;
 
-void setup() {
-    Serial.begin(9600);
+void setup()
+{
+    Serial.begin(115200);
     mpuSetup();
+    rcSetup();
 }
 
-void loop() {
-
+void loop()
+{
     // if programming failed, don't try to do anything
     if (!dmpReady)
         return;
-
     // wait for MPU interrupt or extra packet(s) available
+    if ( millis() - timeBeforeLoop > TIME_OUT_DURATION){
+        mpuInterrupt = false;
+        mpu.resetFIFO();
+        fifoCount = mpu.getFIFOCount();
+    }   
     while (!mpuInterrupt && fifoCount < packetSize)
     {
+        timeBeforeLoop = millis();
         if (mpuInterrupt && fifoCount < packetSize)
         {
             // try to get out of the infinite loop
-            fifoCount = mpu.getFIFOCount();
+            mpu.resetFIFO();
         }
-        // other program behavior stuff here
-        // .
-        // .
-        // .
-        // if you are really paranoid you can frequently test in between other
-        // stuff to see if mpuInterrupt is true, and if so, "break;" from the
-        // while() loop to immediately process the MPU data
-        // .
-        // .
-        // .
+        // Now have access to yaw, pitch, and roll values
+        Serial.println(String(millis()) + "-> Yaw: " + String(yaw, 5) + "°, Pitch: " + String(pitch, 5) + "°, Roll: " + String(roll, 5) + "°");
+        
     }
 
     // reset interrupt flag and get INT_STATUS byte
@@ -90,37 +102,50 @@ void loop() {
     else if (mpuIntStatus & _BV(MPU6050_INTERRUPT_DMP_INT_BIT))
     {
         // wait for correct available data length, should be a VERY short wait
-        while (fifoCount < packetSize)
-            fifoCount = mpu.getFIFOCount();
 
-        // read a packet from FIFO
-        mpu.getFIFOBytes(fifoBuffer, packetSize);
-        mpu.resetFIFO();
+        // TODO: Create a max time to wait so infinte loops don't occur.
+        
+        while (fifoCount < packetSize){
+            fifoCount = mpu.getFIFOCount();
+        }
+
+            // read a packet from FIFO
+            mpu.getFIFOBytes(fifoBuffer, packetSize);
+            mpu.resetFIFO();
+
 
         // track FIFO count here in case there is > 1 packet available
         // (this lets us immediately read more without waiting for an interrupt)
         fifoCount -= packetSize;
 
-        #ifdef OUTPUT_READABLE_QUATERNION
-                // display quaternion values in easy matrix form: w x y z
-                mpu.dmpGetQuaternion(&q, fifoBuffer);
-                Serial.print("quat\t");
-                Serial.print(q.w);
-                Serial.print("\t");
-                Serial.print(q.x);
-                Serial.print("\t");
-                Serial.print(q.y);
-                Serial.print("\t");
-                Serial.println(q.z);
-        #endif
+        mpu.dmpGetQuaternion(&q, fifoBuffer);
+        mpu.dmpGetGravity(&gravity, &q);
+        mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+        yaw = ypr[0] * 180 / M_PI;
+        pitch = ypr[1] * 180 / M_PI;
+        roll = ypr[2] * 180 / M_PI;
     }
 }
 
-void dmpDataReady() {
-    mpuInterrupt = true;
+void dmpDataReady()
+{
+    mpuInterrupt = !mpuInterrupt;
 }
 
-void mpuSetup() {
+void printQuat(Quaternion q)
+{
+    Serial.print("quat\t");
+    Serial.print(q.w);
+    Serial.print("\t");
+    Serial.print(q.x);
+    Serial.print("\t");
+    Serial.print(q.y);
+    Serial.print("\t");
+    Serial.println(q.z);
+}
+
+void mpuSetup()
+{
 
     mpu.initialize();
     pinMode(INTERRUPT_PIN, INPUT);
@@ -157,7 +182,9 @@ void mpuSetup() {
 
         // get expected DMP packet size for later comparison
         packetSize = mpu.dmpGetFIFOPacketSize();
-    } else {
+    }
+    else
+    {
         // ERROR!
         // 1 = initial memory load failed
         // 2 = DMP configuration updates failed
@@ -166,4 +193,14 @@ void mpuSetup() {
         Serial.print(devStatus);
         Serial.println(F(")"));
     }
+}
+
+void rcSetup(){
+    pinMode(CH1_PIN, INPUT);
+    pinMode(CH2_PIN, INPUT);
+    pinMode(CH3_PIN, INPUT);
+    pinMode(CH4_PIN, INPUT);
+    pinMode(CH5_PIN, INPUT);
+    pinMode(CH6_PIN, INPUT);
+
 }
