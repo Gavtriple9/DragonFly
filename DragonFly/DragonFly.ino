@@ -62,6 +62,10 @@ float enableSP = 0.0f;
 
 bool isEnabled = false;
 
+// PID rollAnglePid;
+// PID pitchAnglePid;
+
+
 enum FlightMode
 {
     stable = 0,
@@ -87,46 +91,9 @@ void loop(){
     {
         tTime[2] = millis();
         Serial.println(String(tTime[2]) + "-> Yaw: " + String(yaw, 5) + "°, Pitch: " + String(pitch, 5) + "°, Roll: " + String(roll, 5) + "°");
+        rcLoop();
+        //Serial.println(String(tTime[2]) + "-> Yaw: " + String(yawSP) + ", Pitch: " + String(pitchSP) + ", Roll: " + String(rollSP) + ", Thrust: " + String(thrustSP) + ", FlightMode: " + String(displayFlightMode) + ", enable: " + String(isEnabled ? "true" : "false"));
 
-        flightModeSP = pulseIn(CH5_PIN, HIGH);
-        if (flightModeSP > 0 && flightModeSP < 1300)
-        {
-            flightMode = FlightMode::stable;
-        }
-        else if (flightModeSP > 1300 && flightModeSP < 1700)
-        {
-            flightMode = FlightMode::acro;
-        }
-        else
-        {
-            flightMode = FlightMode::freeFlight;
-        }
-
-        enableSP = pulseIn(CH6_PIN, HIGH);
-        isEnabled = (enableSP > 1500) ? true : false;
-
-        if (isEnabled)
-        {
-            yawSP = map(pulseIn(CH4_PIN, HIGH), 1020.0f, 1968.0f, -180.0f, 180.0f); // degrees
-            pitchSP = map(pulseIn(CH2_PIN, HIGH), 997.0f, 1987.0f, -25.0f, 25.0f);  // degrees
-            rollSP = map(pulseIn(CH1_PIN, HIGH), 997.0f, 1987.0f, -25.0f, 25.0f);   // degrees
-            thrustSP = map(pulseIn(CH3_PIN, HIGH), 1000.0f, 1960.0f, 0.0f, 100.0f); // percentage
-        }
-
-        switch (flightMode)
-        {
-        case 0:
-            displayFlightMode = "Stable";
-            break;
-        case 1:
-            displayFlightMode = "Acro";
-            break;
-        case 2:
-            displayFlightMode = "Free Flight";
-            break;
-        }
-
-        Serial.println(String(tTime[2]) + "-> Yaw: " + String(yawSP) + ", Pitch: " + String(pitchSP) + ", Roll: " + String(rollSP) + ", Thrust: " + String(thrustSP) + ", FlightMode: " + String(displayFlightMode) + ", enable: " + String(isEnabled ? "true" : "false"));
     }
 }
 
@@ -246,8 +213,8 @@ void dmpLoop()
 
         // store roll, pitch, yaw
         yaw = ypr[0] * 180 / PI;
-        roll = ypr[1] * 180 / PI;
-        pitch = ypr[2] * 180 / PI;
+        pitch = ypr[1] * 180 / PI;
+        roll = ypr[2] * 180 / PI;
     }
 }
 
@@ -259,5 +226,50 @@ void rcSetup() {
     pinMode(CH4_PIN, INPUT);
     pinMode(CH5_PIN, INPUT);
     pinMode(CH6_PIN, INPUT);
+}
+
+void rcLoop(){
+    flightModeSP = pulseIn(CH5_PIN, HIGH);
+    if (flightModeSP > 0 && flightModeSP < 1300)
+    {
+        flightMode = FlightMode::stable;
+    }
+    else if (flightModeSP > 1300 && flightModeSP < 1700)
+    {
+        flightMode = FlightMode::acro;
+    }
+    else
+    {
+        flightMode = FlightMode::freeFlight;
+    }
+
+    enableSP = pulseIn(CH6_PIN, HIGH);
+    isEnabled = (enableSP > 1500) ? true : false;
+
+    if (isEnabled)
+    {
+        yawSP = mapS(pulseIn(CH4_PIN, HIGH), 1020.0f, 1968.0f, -180.0f, 180.0f); // degrees
+        pitchSP = mapS(pulseIn(CH2_PIN, HIGH), 997.0f, 1987.0f, -25.0f, 25.0f);  // degrees
+        rollSP = mapS(pulseIn(CH1_PIN, HIGH), 997.0f, 1987.0f, -25.0f, 25.0f);   // degrees
+        thrustSP = mapS(pulseIn(CH3_PIN, HIGH), 997.0f, 1960.0f, 0.0f, 100.0f);  // percentage
+    }
+
+    switch (flightMode)
+    {
+    case 0:
+        displayFlightMode = "Stable";
+        break;
+    case 1:
+        displayFlightMode = "Acro";
+        break;
+    case 2:
+        displayFlightMode = "Free Flight";
+        break;
+    }
+}
+
+float mapS(float value, float iMin, float iMax, float oMin, float oMax){
+
+    return (value-iMin)*(oMax-oMin)/(iMax-iMin)+oMin;
 }
 
