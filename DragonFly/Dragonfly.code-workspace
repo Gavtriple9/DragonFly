@@ -1,9 +1,25 @@
 {
-	"folders": [
-		{
-			"name": "DragonFly",
-			"path": "."
-		}
-	],
-	"settings": {}
+    "folders": [
+        {
+            "name": "DragonFly",
+            "path": "../../../PlatformIO/Projects/DragonFly"
+        },
+        {
+            "name": "tesr",
+            "path": "../../../PlatformIO/Projects/tesr"
+        }
+    ],
+    "settings": {
+        "files.associations": {
+            "math.h": "c",
+            "mpu6050.h": "c",
+            "i2cdev.h": "c",
+            "wire.h": "c",
+            "wireimxrt.h": "c",
+            "wirekinetis.h": "c",
+            "functional": "c",
+            "memory": "c",
+            "sstream": "c"
+        }
+    }
 }
