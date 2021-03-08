@@ -1,4 +1,5 @@
 #include "Core.h"
+#include <string.h>
 #define LED_PIN 13
 
 MPU6050 mpu;
@@ -6,7 +7,7 @@ MPU6050 mpu;
 int16_t ax, ay, az;
 int16_t gx, gy, gz;
 
-char* buffer;
+String buffer;
 
 bool blinkState = false;
 
@@ -33,8 +34,15 @@ void loop()
 	blinkState = !blinkState;
 	digitalWrite(LED_PIN, blinkState);
 
-	printf(buffer, "Accel: < %f, %f, %f >,  Gyro: < %f, %f, %f >", ax, ay, az, gx, gy, gz );
-	Serial.println(buffer);
+	Serial.print("a/g:\t");
+    Serial.print(ax); Serial.print("\t");
+    Serial.print(ay); Serial.print("\t");
+    Serial.print(az); Serial.print("\t");
+    Serial.print(gx); Serial.print("\t");
+    Serial.print(gy); Serial.print("\t");
+    Serial.println(gz);
+	
+	// Serial.println(buffer);
 	// Collect data from sensors
 	// Process data
   	// Output data
