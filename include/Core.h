@@ -9,5 +9,6 @@
 #include "MPU6050.h"
 
 #include "BMP180/BMP180.h"
+#include "PID/PID.h"
 
 #endif
