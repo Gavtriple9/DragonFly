@@ -1,5 +1,5 @@
 #include "Core.h"
-#include <string.h>
+
 #define LED_PIN 13
 #define BMP085_ADDRESS 0x77
 #define ACC_SENS 16384.0
@@ -9,10 +9,16 @@
 
 MPU6050 mpu;	// inertial measurement unit 
 BMP180 bmp(2); 	// barametric pressure sensor
+TinyGPSPlus gps; // possible gps library
 
-PID yawPid(1, 1, 1);
+PID yawPid(1, 1, 1); // kP = 1, kI = 1, kD = 1
 
-float yawPidVal = 0.0f;
+struct {
+	float rollCommand = 0.0f;
+	float pitchCommand = 0.0f;
+	float yawCommand = 0.0f;
+
+} pidCommands;
 
 int16_t ax, ay, az; // raw acceleration reading
 int16_t gx, gy, gz; // raw angular rate reading
@@ -32,6 +38,7 @@ float now, prevTime, dt; // milliseconds ms
 bool blinkState = false;
 
 void printData(void);
+void displayInfo();
 
 void setup() {
 	now = 0.0f; // initialize drone internal clock to 0
@@ -39,15 +46,12 @@ void setup() {
 
 	Serial.println("Initializing wire");
 	Wire.begin();
-	Wire1.begin();
 
 	Serial.println("Setting wire 1");
 	Wire.setSCL(19);
 	Wire.setSDA(18);
 
 	Serial.println("Setting wire 2");
-	Wire1.setSCL(16);
-	Wire1.setSDA(17);
 
 	mpu.initialize();
 	bmp.initialize();
@@ -101,7 +105,35 @@ void loop()
 	// translate data into torques and forces
 
 	// Output data to motors
+	printData();
+
 
 	blinkState = !blinkState;	   // to signify 1 control loop cycle
 	digitalWrite(LED_PIN, blinkState); // can be monitored on oscilloscope
+}
+
+
+void printData(void)
+{
+
+	Serial.print(roll);
+	Serial.print("/");
+	Serial.print(pitch);
+	Serial.print("/");
+	Serial.println(yaw);
+
+	// Print barameter
+	Serial.print("Temperature: ");
+	Serial.print(temp, 2);
+	Serial.println("deg C");
+
+	Serial.print("Pressure: ");
+	Serial.print(press, 0);
+	Serial.println(" Pa");
+
+	Serial.print("Altitude: ");
+	Serial.print(alti, 2);
+	Serial.println(" M");
+
+	Serial.println();
 }

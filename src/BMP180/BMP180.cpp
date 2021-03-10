@@ -89,15 +89,15 @@ long BMP180::getPressure(unsigned long up){
 // Read 1 byte from the BMP085 at 'address'
 char BMP180::read(unsigned char address)
 {
-    Wire1.beginTransmission(BMP180_ADDRESS);
-    Wire1.write(address);
-    Wire1.endTransmission();
+    Wire.beginTransmission(BMP180_ADDRESS);
+    Wire.write(address);
+    Wire.endTransmission();
 
-    Wire1.requestFrom(BMP180_ADDRESS, 1);
-    while(!Wire1.available())
+    Wire.requestFrom(BMP180_ADDRESS, 1);
+    while(!Wire.available())
         ;
 
-    return Wire1.read();
+    return Wire.read();
 }
 
 // Read 2 bytes from the BMP085
@@ -107,15 +107,15 @@ int BMP180::readInt(unsigned char address)
 {
     unsigned char msb, lsb;
 
-    Wire1.beginTransmission(BMP180_ADDRESS);
-    Wire1.write(address);
-    Wire1.endTransmission();
+    Wire.beginTransmission(BMP180_ADDRESS);
+    Wire.write(address);
+    Wire.endTransmission();
 
-    Wire1.requestFrom(BMP180_ADDRESS, 2);
-    while(Wire1.available()<2)
+    Wire.requestFrom(BMP180_ADDRESS, 2);
+    while(Wire.available()<2)
         ;
-    msb = Wire1.read();
-    lsb = Wire1.read();
+    msb = Wire.read();
+    lsb = Wire.read();
 
     return (int) msb<<8 | lsb;
 }
@@ -126,10 +126,10 @@ unsigned int BMP180::readUT(){
 
     // Write 0x2E into Register 0xF4
     // This requests a temperature reading
-    Wire1.beginTransmission(BMP180_ADDRESS);
-    Wire1.write(0xF4);
-    Wire1.write(0x2E);
-    Wire1.endTransmission();
+    Wire.beginTransmission(BMP180_ADDRESS);
+    Wire.write(0xF4);
+    Wire.write(0x2E);
+    Wire.endTransmission();
 
     // Wait at least 4.5ms
     delay(5);
@@ -147,10 +147,10 @@ unsigned long BMP180::readUP(){
 
   // Write 0x34+(OSS<<6) into register 0xF4
   // Request a pressure reading w/ oversampling setting
-  Wire1.beginTransmission(BMP180_ADDRESS);
-  Wire1.write(0xF4);
-  Wire1.write(0x34 + (OSS<<6));
-  Wire1.endTransmission();
+  Wire.beginTransmission(BMP180_ADDRESS);
+  Wire.write(0xF4);
+  Wire.write(0x34 + (OSS<<6));
+  Wire.endTransmission();
 
   // Wait for conversion, delay time dependent on OSS
   delay(2 + (3<<OSS));
