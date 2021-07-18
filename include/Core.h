@@ -1,5 +1,6 @@
-#ifndef DRAGONFLY_h
-#define DRAGONFLY_h
+#pragma once
+#ifndef CORE_H
+#define CORE_H
 
 #include <Arduino.h>
 #include <Wire.h>
@@ -11,7 +12,5 @@
 #include "MPU6050.h"
 #include "TinyGPS++.h"
 
-#include "BMP180/BMP180.h"
-#include "PID/PID.h"
-
+#include "Drone.h"
 #endif

@@ -1,0 +1,43 @@
+void loop()
+{
+	prevTime = now;
+	now = millis(); // the time at the start of the next loop
+	dt = (now - prevTime) / 1000; // time step in seconds
+
+	// Collect data from sensors
+	drone.mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+	//bmp.getValues(&temp, &press, &alti);
+
+	// Process data
+	gyroX = (float) gx / GYR_SENS;
+	gyroY = (float) gy / GYR_SENS;
+	gyroZ = (float) gz / GYR_SENS;
+
+	accX = (float) ax / ACC_SENS;
+	accY = (float) ay / ACC_SENS;
+	accZ = (float) az / ACC_SENS;
+
+	gyroAngleX = gyroAngleX + gyroX * dt;
+	gyroAngleY = gyroAngleY + gyroY * dt;
+	yaw = yaw + gyroZ * dt;
+
+	accAngleX = (atan(accY / sqrt(accX * accX + accZ * accZ)) * RADTODEG);
+	accAngleY = (atan(-1 * accX / sqrt(accY * accY + accZ * accZ)) * RADTODEG);
+
+	// kalman filter for Gyro & Accel
+	roll = 0.96 * gyroAngleX + 0.04 * accAngleX;
+	pitch = 0.96 * gyroAngleY + 0.04 * accAngleY;
+
+	// TODO
+
+	// PID loops
+
+	// translate data into torques and forces
+
+	// Output data to motors
+	printData();
+
+
+	blinkState = !blinkState;	   // to signify 1 control loop cycle
+	digitalWrite(LED_PIN, blinkState); // can be monitored on oscilloscope
+}
