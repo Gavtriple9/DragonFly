@@ -1,7 +1,12 @@
 #pragma once
-#include "Core.h"
 #ifndef DRONE_H
 #define DRONE_H
+
+#include "Core.h"
+
+#include "I2Cdev.h"
+#include "MPU6050.h"
+#include "TinyGPS++.h"
 
 namespace DF {
     class Drone {
@@ -16,6 +21,11 @@ namespace DF {
         // BMP180 bmp; 	    // barametric pressure sensor
         TinyGPSPlus gps;    // possible gps library
     /////////////////////////////////////////////////////
+    float pos;
+    float vel;
+    float acc;
+    float orientation;
+    float omega;
 
     };
 }
