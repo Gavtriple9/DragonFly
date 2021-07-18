@@ -1,16 +1,21 @@
 #include "Core.h"
 #include "Drone.h"
-#include "Quaternion.h"
-#include "Vector3D.h"
 
-DF::Drone dragonfly;
-Vector3D vect = Vector3D(1.0,1.0,1.0);
-Quaternion quat = Quaternion(3.1415F, vect);
+DF::Drone dragonfly; 
+bool blinkState = false;
 
 void setup() {
-	Serial.begin(9600);
-	//dragonfly.initialize();
-	Serial.println(quat.toString());
+	delay(1000);
+	Serial.begin(115200);
+	Serial.println("Program Start");
+	Serial.println("Initializing wire");
+	Wire.begin();
+	Serial.println("Setting wire 1");
+	Wire.setSCL(SCL_PIN);
+	Wire.setSDA(SDA_PIN);
+
+	dragonfly.initialize();
+	dragonfly.calibrateIMU();
 }
 
 void loop(){
@@ -20,5 +25,7 @@ void loop(){
 	// pass values to control algorithm									  //
 	// first control mode should be "stabilize" to ensure level flying	  //
 	////////////////////////////////////////////////////////////////////////
-	Serial.println(quat.toString());
+	
+	blinkState = !blinkState;	   // to signify 1 control loop cycle
+	digitalWrite(LED_PIN, blinkState); // can be monitored on oscilloscope
 }

@@ -4,9 +4,14 @@
 
 #include "Core.h"
 
-#include "I2Cdev.h"
-#include "MPU6050.h"
-#include "TinyGPS++.h"
+#include <I2Cdev.h>
+#include <MPU6050.h>
+#include <SFE_BMP180.h>
+#include <TinyGPS++.h>
+
+#include "Quaternion.h"
+
+#define CALIBRATION_PASSES 15
 
 namespace DF {
     class Drone {
@@ -14,19 +19,18 @@ namespace DF {
         Drone();
         void initialize(void);
         void calibrateIMU(void);
+        bool testConnections();
 
     private:
-    // Sensors ///////////////////////////////////////////
-        MPU6050 imu;	    // inertial measurement unit 
-        // BMP180 bmp; 	    // barametric pressure sensor
-        TinyGPSPlus gps;    // possible gps library
-    /////////////////////////////////////////////////////
-    float pos;
-    float vel;
-    float acc;
-    float orientation;
-    float omega;
-
+        MPU6050 imu;	        // inertial measurement unit 
+        SFE_BMP180 pressure; 	// barametric pressure sensor
+        TinyGPSPlus gps;        // possible gps library
+        
+        Vector3D pos;
+        Vector3D vel;
+        Vector3D acc;
+        Quaternion orientation;
+        Quaternion omega;
     };
 }
 
