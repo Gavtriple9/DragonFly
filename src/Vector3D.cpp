@@ -41,19 +41,17 @@ DF::Vector3D DF::Vector3D::getNorm(void){
 
 
 String DF::Vector3D::toString(){
-    String rtrnStr = "v = < ";
-    rtrnStr += String(v1) + ", ";
-    rtrnStr += String(v2) + ", ";
-    rtrnStr += String(v3) + ", ";
-    rtrnStr += ">";
+    String rtrnStr = "<";
+    rtrnStr += String(v1) + ",";
+    rtrnStr += String(v2) + ",";
+    rtrnStr += String(v3) + ">";
     return rtrnStr;
 }
 
 String DF::Vector3D::toString(int accuracy){
-    String rtrnStr = "v = < ";
-    rtrnStr += String(v1, accuracy) + ", ";
-    rtrnStr += String(v2, accuracy) + ", ";
-    rtrnStr += String(v3, accuracy) + ", ";
-    rtrnStr += ">";
+    String rtrnStr = "<";
+    rtrnStr += String(v1, accuracy) + ",";
+    rtrnStr += String(v2, accuracy) + ",";
+    rtrnStr += String(v3, accuracy) + ">";
     return rtrnStr;
 }

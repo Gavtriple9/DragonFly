@@ -35,21 +35,19 @@ DF::Quaternion DF::Quaternion::getInverse(void){
 }
 
 String DF::Quaternion::toString(){
-    String rtrnStr = "q = < ";
+    String rtrnStr = "<";
     rtrnStr += String(q0) + ", ";
     rtrnStr += String(q1) + ", ";
     rtrnStr += String(q2) + ", ";
-    rtrnStr += String(q3) + ", ";
-    rtrnStr += ">";
+    rtrnStr += String(q3) + ">";
     return rtrnStr;
 }
 
 String DF::Quaternion::toString(int accuracy){
-    String rtrnStr = "q = < ";
-    rtrnStr += String(q0, accuracy) + ", ";
-    rtrnStr += String(q1, accuracy) + ", ";
-    rtrnStr += String(q2, accuracy) + ", ";
-    rtrnStr += String(q3, accuracy) + ", ";
-    rtrnStr += ">";
+    String rtrnStr = "<";
+    rtrnStr += String(q0, accuracy) + ",";
+    rtrnStr += String(q1, accuracy) + ",";
+    rtrnStr += String(q2, accuracy) + ",";
+    rtrnStr += String(q3, accuracy) + ">";
     return rtrnStr;
 }
