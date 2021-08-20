@@ -4,15 +4,51 @@ DF::Drone::Drone(){
     
 }
 
+void DF::Drone::initialize(){
+
+    Serial.println("Initializing GPS Serial");
+
+	HWSERIAL.begin(GPSBaud);
+	HWSERIAL.setRX(RXPin);
+	HWSERIAL.setTX(TXPin);
+
+    imu.setup(MPU9250_ADDRESS);
+    imu.setMagneticDeclination(MAGNETIC_DECLINATION);
+    imu.selectFilter(QuatFilterSel::MAHONY);
+
+    if (DEBUG_MODE) {imu.verbose(true);}
+    Serial.println( imu.isConnected() ? "MPU9250 connection successful" : "MPU9250 connection failed");
+    Serial.println( pressure.begin() ? "BMP180 connection successful" : "BMP180 connection failed");
+
+    Serial.println( "Attaching Motors" );
+    motor1.attach(MOTOR_1_PIN);
+    motor2.attach(MOTOR_2_PIN);
+    motor3.attach(MOTOR_3_PIN);
+    motor4.attach(MOTOR_4_PIN);
+    setAllMotors(0);
+
+}
+
+String DF::Drone::strStatus(){
+    String rtnstr = "Dragonfly | r: ";
+    rtnstr += String(state.altitude) + " m | v: "; 
+    rtnstr += state.vel.toString() + " m/s | a: ";
+    rtnstr += state.acc.toString() + " m/s^2 | q: ";
+    rtnstr += state.orientation.toString(2) + " | w: ";
+    rtnstr += state.omega.toString();
+    rtnstr += " | Lat: " + String(gps.location.lat(),6);
+    rtnstr += " | Lng: " + String(gps.location.lng(),6);
+    return rtnstr;
+}
+
 void DF::Drone::calibrateIMU(){
-    if (imu.testConnection()) {
-        Serial.println("Now calibrating gyroscope");
-        imu.CalibrateGyro(CALIBRATION_LOOPS);
-        Serial.println("\nOperation Complete: gyroscope is now calibrated");
-        Serial.println("Now Calibrating Accelerometer");
-        imu.CalibrateAccel(CALIBRATION_LOOPS);
-        Serial.println("\nOperation Complete: accelerometer is now calibrated");
-        imu.PrintActiveOffsets();
+    if (imu.isConnected()) {
+        Serial.println("Now calibrating gyroscope and accelerometer");
+        imu.calibrateAccelGyro();
+        Serial.println("\nOperation Complete");
+        Serial.println("Now calibrating magnetometer");
+        imu.calibrateMag();
+        Serial.println("\nOperation Complete");
     }  
 }
 
@@ -20,6 +56,7 @@ void DF::Drone::getUserCommand(){
     String speedString = "";
     while(Serial.available()){
 		int currRead = Serial.read();
+        // 10 is new line '/n' and interpreted as a finished command
 		if( currRead == 10 ){
             if ( speedString == "0" ) {
 				setAllMotors(0);
@@ -56,50 +93,37 @@ void DF::Drone::getUserCommand(){
 	}
 };
 
-void DF::Drone::initialize(){
-
-    imu.initialize();
-    Serial.println( imu.testConnection() ? "MPU6050 connection successful" : "MPU6050 connection failed");
-    Serial.println( pressure.begin() ? "BMP180 connection successful" : "BMP180 connection failed");
-
-    Serial.println( "Attaching Motors" );
-    motor1.attach(MOTOR_1_PIN);
-    motor2.attach(MOTOR_2_PIN);
-    motor3.attach(MOTOR_3_PIN);
-    motor4.attach(MOTOR_4_PIN);
-    setAllMotors(0);
+String DF::Drone::transmitQuat(){
+    return state.orientation.toString(4);
 }
 
-bool DF::Drone::testConnections(){
-    return imu.testConnection();
-}
-
-void DF::Drone::getData(){
-    int16_t ax, ay, az; // raw acceleration reading
-    int16_t gx, gy, gz; // raw angular rate reading
-    int16_t mx, my, mz; // raw B field direction reading
-
-    imu.getMotion9(&ax, &ay, &az, &gx, &gy, &gz, &mx, &my, &mz);
-    Serial.println(
-        "Ax: " + String(ax) 
-        + " Ay: " + String(ay) 
-        + " Az: " + String(az) 
-        + " Gx: " + String(gx)
-        + " Gy: " + String(gy)
-        + " Gz: " + String(gz)
-        + " Mx: " + String(mx)
-        + " My: " + String(my)
-        + " Mz: " + String(mz) + "\n"
+void DF::Drone::update(){
+    updateReadings();
+    //updateReciever();
+    state.orientation = DF::Quaternion(
+        imu.getQuaternionW(),
+        imu.getQuaternionX(),
+        imu.getQuaternionY(), 
+        imu.getQuaternionZ()
     );
 }
 
 void DF::Drone::updateReadings(){
-    getData();
-    state.orientation = Quaternion(0, 0, 0, 0);
-}
+    // update lin_acc, vel, pos, & orientation
+    imu.update();
+    
+    // Update altitude 
+    double temp; // perfect variable name
+    double press;
+    delay(pressure.startTemperature());
+    pressure.getTemperature(temp);
+    delay(pressure.startPressure(0));
+    pressure.getPressure(press, temp);
+    state.altitude = pressure.altitude(press, SEA_LEVEL_PRESSURE) - ALTITUDE;
 
-void DF::Drone::updateGPS(int ch){
-    gps.encode(ch);
+    while (HWSERIAL.available()) {
+		gps.encode(HWSERIAL.read());
+	}
 }
 
 void DF::Drone::updateReciever(void){
@@ -120,18 +144,6 @@ void DF::Drone::displayReceiever(){
         + " Ch5: " + String(rc.ch5)
         + " Ch6: " + String(rc.ch6) + "\n"
     );
-}
-
-String DF::Drone::strStatus(){
-    String rtnstr = "Dragonfly | r: ";
-    rtnstr += state.pos.toString() + " m | v: "; 
-    rtnstr += state.vel.toString() + " m/s | a: ";
-    rtnstr += state.acc.toString() + " m/s^2 | q: ";
-    rtnstr += state.orientation.toString(2) + " | w: ";
-    rtnstr += state.omega.toString();
-    rtnstr += " | Lat: " + String(gps.location.lat(),6);
-    rtnstr += " | Lng: " + String(gps.location.lng(),6);
-    return rtnstr;
 }
 
 void DF::Drone::setMotor1Speed(float speed){

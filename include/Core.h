@@ -9,20 +9,16 @@
 #include <map>
 #include <SoftwareSerial.h>
 
-#define LED_PIN 13
+#define DEBUG_MODE true
+#define CALIBRATE_DRONE true
 
-// I2C pins
-#define SDA_PIN 18
-#define SCL_PIN 19
+#define HWSERIAL Serial1
 
-// Motor pins
-#define MOTOR_1_PIN 2
-#define MOTOR_2_PIN 3
-#define MOTOR_3_PIN 4
-#define MOTOR_4_PIN 6
-
-// Reciever pin
-#define RECIEVER_PPM_PIN 7
+// Constants
+#define ALTITUDE 88 // m
+#define SEA_LEVEL_PRESSURE 1010.845f // mBar
+#define MAGNETIC_DECLINATION 12.00611f // degrees
+#define EARTH_CENTER_TO_SEALEVEL 6371146 // m
 
 #define MAX_MOTOR_SPEED 2000
 #define MIN_MOTOR_SPEED 1000
@@ -36,5 +32,26 @@
 
 #define RADTODEG(n) n*57.2957795131
 #define DEGTORAD(n) n*0.01745329251
+
+// Motor pins
+#define MOTOR_1_PIN 2
+#define MOTOR_2_PIN 3
+#define MOTOR_3_PIN 4
+#define MOTOR_4_PIN 6
+
+// Reciever pin
+#define RECIEVER_PPM_PIN 7
+
+// Ultrasonic sensor
+#define TRIG_PIN 8
+#define ECHO_PIN 9
+
+// Board LED and control loop frequency (CLF)
+#define LED_PIN 13
+
+// I2C pins
+#define SDA_PIN 18
+#define SCL_PIN 19
+
 
 #endif
