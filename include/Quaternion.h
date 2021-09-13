@@ -19,8 +19,13 @@ namespace DF{
         Quaternion operator*(Quaternion u);
         Quaternion getInverse(void);
 
+        float getW(){return q0;};
+        float getX(){return q1;};
+        float getY(){return q2;};
+        float getZ(){return q3;};
+
     private:
-        float q0, q1, q2, q3;
+        float q0, q1, q2, q3; // w, x, y, z
     };
 }
 #endif
