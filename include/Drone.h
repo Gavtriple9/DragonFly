@@ -9,23 +9,29 @@
 #include <SFE_BMP180.h>
 #include <TinyGPS++.h>
 #include <MPU9250.h>
+#include <SD.h>
+#include <SPI.h>
+
 
 #include "Quaternion.h"
+#include "Matrix3D.h"
 
 namespace DF {
     class Drone {
     public:
-
         static const int RXPin = 0, TXPin = 1;
         static const uint32_t GPSBaud = 9600;
 
         Drone();
         // Drone functions
-        void initialize(void);
-        void update(void);
+        void init(void);
         String strStatus();
         void calibrateIMU(void);
-        void getUserCommand(void);
+        void update(float dt);
+        void saveIMUData();
+        void loadIMUData();
+    
+        void getUserCommand(void); // from keyboard (temp function)
         
         // Motor control functions
         void setMotor1Speed(float);
@@ -55,12 +61,15 @@ namespace DF {
         Servo motor3;
         Servo motor4;
 
+        File IMUData;
+
         struct{
             float altitude;
             Vector3D pos;
             Vector3D vel;
             Vector3D acc;
             Quaternion orientation;
+            Matrix3D rotMat;
             Quaternion omega;
         }state;
 
@@ -73,7 +82,6 @@ namespace DF {
             unsigned int ch6;
         }rc;
 
-        void updateReciever(void);
         void updateReadings();
 
     };

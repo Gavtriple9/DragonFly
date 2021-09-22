@@ -27,6 +27,9 @@ DF::Vector3D DF::Vector3D::operator*(float scalar){
 DF::Vector3D DF::Vector3D::operator+(DF::Vector3D u){
     return DF::Vector3D(v1+u.v1, v2+u.v2, v3+u.v3);
 }
+DF::Vector3D DF::Vector3D::operator-(DF::Vector3D u){
+    return DF::Vector3D(v1-u.v1, v2-u.v2, v3-u.v3);
+}
 
 void DF::Vector3D::normalize(void){
     float mag = sqrt(v1*v1 + v2*v2 + v3*v3);

@@ -23,3 +23,17 @@ DF::Matrix3D::Matrix3D(Quaternion q){
     yComp = Vector3D(2*(qXqY + qZqW), 1-2*(qXSquared + qZSquared), 2*(qYqZ - qXqW));
     zComp = Vector3D(2*(qXqZ - qYqW), 2*(qYqZ + qXqW), 1-2*(qXSquared + qYSquared));
 }
+
+DF::Vector3D DF::Matrix3D::operator*(DF::Vector3D v){
+    float newX = xComp.getX() * v.getX() + xComp.getY() * v.getY() + xComp.getZ() * v.getZ();
+    float newY = yComp.getX() * v.getX() + yComp.getY() * v.getY() + yComp.getZ() * v.getZ();
+    float newZ = zComp.getX() * v.getX() + zComp.getY() * v.getY() + zComp.getZ() * v.getZ();
+    
+    return DF::Vector3D(newX, newY, newZ);
+}
+
+void DF::Matrix3D::display(){
+    for ( int i = 0; i < 3; i++ ){
+       Serial.println();
+    }  
+}

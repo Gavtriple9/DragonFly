@@ -4,7 +4,13 @@ DF::Drone::Drone(){
     
 }
 
-void DF::Drone::initialize(){
+void DF::Drone::init(){
+
+    if (!SD.begin(BUILTIN_SDCARD)) {
+        Serial.println("initialization failed. No SD card found.");
+    } else {
+        Serial.println("SD card is present.");
+    }
 
     Serial.println("Initializing GPS Serial");
 
@@ -14,7 +20,7 @@ void DF::Drone::initialize(){
 
     imu.setup(MPU9250_ADDRESS);
     imu.setMagneticDeclination(MAGNETIC_DECLINATION);
-    imu.selectFilter(QuatFilterSel::MAHONY);
+    imu.selectFilter(DRONE_FILTER);
 
     if (DEBUG_MODE) {imu.verbose(true);}
     Serial.println( imu.isConnected() ? "MPU9250 connection successful" : "MPU9250 connection failed");
@@ -25,19 +31,18 @@ void DF::Drone::initialize(){
     motor2.attach(MOTOR_2_PIN);
     motor3.attach(MOTOR_3_PIN);
     motor4.attach(MOTOR_4_PIN);
+    
     setAllMotors(0);
-
 }
 
 String DF::Drone::strStatus(){
-    String rtnstr = "Dragonfly | r: ";
-    rtnstr += String(state.altitude) + " m | v: "; 
-    rtnstr += state.vel.toString() + " m/s | a: ";
-    rtnstr += state.acc.toString() + " m/s^2 | q: ";
-    rtnstr += state.orientation.toString(2) + " | w: ";
-    rtnstr += state.omega.toString();
-    rtnstr += " | Lat: " + String(gps.location.lat(),6);
-    rtnstr += " | Lng: " + String(gps.location.lng(),6);
+    String rtnstr = "Dragonfly | ";
+    rtnstr += "r: " + state.pos.toString(4) + " m | "; 
+    rtnstr += "v: " + state.vel.toString(4) + " m/s | ";
+    rtnstr += "a: " + state.acc.toString(4) + " m/s^2 | ";
+    rtnstr += "q: " + state.orientation.toString(4) + " | ";
+    rtnstr += "Lat: " + String(gps.location.lat(),6) + " ";
+    rtnstr += "Lng: " + String(gps.location.lng(),6);
     return rtnstr;
 }
 
@@ -49,7 +54,10 @@ void DF::Drone::calibrateIMU(){
         Serial.println("Now calibrating magnetometer");
         imu.calibrateMag();
         Serial.println("\nOperation Complete");
-    }  
+    } else {
+        Serial.println("CRITICAL ERROR: No IMU detected. Now aborting");
+        return;
+    } 
 }
 
 void DF::Drone::getUserCommand(){
@@ -97,42 +105,119 @@ String DF::Drone::transmitQuat(){
     return state.orientation.toString(4);
 }
 
-void DF::Drone::update(){
+void DF::Drone::update(float dt){
     updateReadings();
-    //updateReciever();
+    // update lin_acc, vel, pos, & orientation
     state.orientation = DF::Quaternion(
         imu.getQuaternionW(),
         imu.getQuaternionX(),
         imu.getQuaternionY(), 
         imu.getQuaternionZ()
     );
+    state.rotMat = DF::Matrix3D(state.orientation);
+    state.acc = (
+        state.rotMat*(DF::Vector3D(imu.getAccX(), imu.getAccY(), imu.getAccZ()) - DF::Vector3D(0,0,1))
+    )*9.81;
+    state.vel = DF::Vector3D( 
+        state.vel.getX() + state.acc.getX()*dt,
+        state.vel.getY() + state.acc.getY()*dt,
+        state.vel.getZ() + state.acc.getZ()*dt
+    );
+    state.pos = DF::Vector3D( 
+        state.pos.getX() + state.vel.getX()*dt,
+        state.pos.getY() + state.vel.getY()*dt,
+        state.pos.getZ() + state.vel.getZ()*dt
+    );
 }
 
 void DF::Drone::updateReadings(){
-    // update lin_acc, vel, pos, & orientation
-    imu.update();
-    
+    if (UPDATE_RC){
+        rc.ch1 = reciever.latestValidChannelValue(1, 0);
+        rc.ch2 = reciever.latestValidChannelValue(2, 0);
+        rc.ch3 = reciever.latestValidChannelValue(3, 0);
+        rc.ch4 = reciever.latestValidChannelValue(4, 0);
+        rc.ch5 = reciever.latestValidChannelValue(5, 0);
+        rc.ch6 = reciever.latestValidChannelValue(6, 0);
+    }
+    if (UPDATE_IMU){
+        imu.update();
+    }
+    if (UPDATE_PRESS) {
     // Update altitude 
-    double temp; // perfect variable name
-    double press;
-    delay(pressure.startTemperature());
-    pressure.getTemperature(temp);
-    delay(pressure.startPressure(0));
-    pressure.getPressure(press, temp);
-    state.altitude = pressure.altitude(press, SEA_LEVEL_PRESSURE) - ALTITUDE;
-
+        double temp; // perfect variable name
+        double press;
+        delay(pressure.startTemperature());
+        pressure.getTemperature(temp);
+        delay(pressure.startPressure(0));
+        pressure.getPressure(press, temp);
+        state.altitude = pressure.altitude(press, SEA_LEVEL_PRESSURE) - ALTITUDE;
+    }
+    if (UPDATE_GPS) 
     while (HWSERIAL.available()) {
 		gps.encode(HWSERIAL.read());
 	}
 }
 
-void DF::Drone::updateReciever(void){
-    rc.ch1 = reciever.latestValidChannelValue(1, 0);
-    rc.ch2 = reciever.latestValidChannelValue(2, 0);
-    rc.ch3 = reciever.latestValidChannelValue(3, 0);
-    rc.ch4 = reciever.latestValidChannelValue(4, 0);
-    rc.ch5 = reciever.latestValidChannelValue(5, 0);
-    rc.ch6 = reciever.latestValidChannelValue(6, 0);
+void DF::Drone::saveIMUData(){
+    // open a new file and immediately close it:
+    if (SD.exists("IMUData.txt")) {
+        SD.remove("IMUData.txt");
+    }
+    IMUData = SD.open("IMUData.txt", FILE_WRITE);
+    IMUData.println(imu.getAccBiasX());
+    IMUData.println(imu.getAccBiasY());
+    IMUData.println(imu.getAccBiasZ());
+
+    IMUData.println(imu.getGyroBiasX());
+    IMUData.println(imu.getGyroBiasY());
+    IMUData.println(imu.getGyroBiasZ());
+
+    IMUData.println(imu.getMagBiasX());
+    IMUData.println(imu.getMagBiasY());
+    IMUData.println(imu.getMagBiasZ());
+
+    IMUData.println(imu.getMagScaleX());
+    IMUData.println(imu.getMagScaleY());
+    IMUData.println(imu.getMagScaleZ());
+    IMUData.println("~");
+    IMUData.close();
+}
+
+void DF::Drone::loadIMUData(){
+    int maxCharLength = 10;
+
+    if (SD.exists("IMUData.txt")) {
+
+        IMUData = SD.open("IMUData.txt", FILE_READ);
+
+        float accBiasX = (IMUData.readStringUntil('\n', maxCharLength)).toFloat();
+        float accBiasY = (IMUData.readStringUntil('\n', maxCharLength)).toFloat();
+        float accBiasZ = (IMUData.readStringUntil('\n', maxCharLength)).toFloat();
+
+        float gyroBiasX = (IMUData.readStringUntil('\n', maxCharLength)).toFloat();
+        float gyroBiasY = (IMUData.readStringUntil('\n', maxCharLength)).toFloat();
+        float gyroBiasZ = (IMUData.readStringUntil('\n', maxCharLength)).toFloat();
+
+        float magBiasX = (IMUData.readStringUntil('\n', maxCharLength)).toFloat();
+        float magBiasY = (IMUData.readStringUntil('\n', maxCharLength)).toFloat();
+        float magBiasZ = (IMUData.readStringUntil('\n', maxCharLength)).toFloat();
+
+        float magScaleX = (IMUData.readStringUntil('\n', maxCharLength)).toFloat();
+        float magScaleY = (IMUData.readStringUntil('\n', maxCharLength)).toFloat();
+        float magScaleZ = (IMUData.readStringUntil('\n', maxCharLength)).toFloat();
+
+        IMUData.close();
+
+        imu.setAccBias(accBiasX, accBiasY, accBiasZ);
+        imu.setGyroBias(gyroBiasX, gyroBiasY, gyroBiasZ);
+        imu.setMagBias(magBiasX, magBiasY, magBiasZ);
+        imu.setMagScale(magScaleX, magScaleY, magScaleZ);
+
+    } else {
+        Serial.println("ERROR: No calibration data found");
+        Serial.println("Now running calibration");
+        calibrateIMU();
+    }
 }
 
 void DF::Drone::displayReceiever(){

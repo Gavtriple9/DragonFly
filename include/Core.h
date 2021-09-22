@@ -10,14 +10,23 @@
 #include <SoftwareSerial.h>
 
 #define DEBUG_MODE true
-#define CALIBRATE_DRONE true
+#define CALIBRATE_DRONE false
+
+#define DRONE_FILTER QuatFilterSel::MADGWICK 
+// #define DRONE_FILTER QuatFilterSel::MAHONY
+
+// update specific sensors
+#define UPDATE_RC false
+#define UPDATE_IMU true
+#define UPDATE_PRESS false
+#define UPDATE_GPS true
 
 #define HWSERIAL Serial1
 
 // Constants
-#define ALTITUDE 88 // m
+#define ALTITUDE 68 // m
 #define SEA_LEVEL_PRESSURE 1010.845f // mBar
-#define MAGNETIC_DECLINATION 12.00611f // degrees
+#define MAGNETIC_DECLINATION 11.00611f // degrees
 #define EARTH_CENTER_TO_SEALEVEL 6371146 // m
 
 #define MAX_MOTOR_SPEED 2000
