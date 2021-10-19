@@ -30,6 +30,7 @@ namespace DF {
         void update(float dt);
         void saveIMUData();
         void loadIMUData();
+        Quaternion getOrientation(void){return state.orientation;}
     
         void getUserCommand(void); // from keyboard (temp function)
         
@@ -45,7 +46,7 @@ namespace DF {
         // Controller collected data
         void displayReceiever(void);
 
-        String transmitQuat(void);
+        void transmitQuat(void);
 
 
     private:
@@ -71,6 +72,7 @@ namespace DF {
             Quaternion orientation;
             Matrix3D rotMat;
             Quaternion omega;
+            boolean failSafe;
         }state;
 
         struct{

@@ -12,8 +12,8 @@
 #define DEBUG_MODE true
 #define CALIBRATE_DRONE false
 
-#define DRONE_FILTER QuatFilterSel::MADGWICK 
-// #define DRONE_FILTER QuatFilterSel::MAHONY
+// #define DRONE_FILTER QuatFilterSel::MADGWICK 
+#define DRONE_FILTER QuatFilterSel::MAHONY
 
 // update specific sensors
 #define UPDATE_RC false

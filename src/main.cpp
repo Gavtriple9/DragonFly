@@ -31,10 +31,8 @@ void setup() {
 	
 	if ( CALIBRATE_DRONE ){
 		dragonfly.calibrateIMU();
-    dragonfly.saveIMUData();
-	} else {
-    dragonfly.loadIMUData();
-  }
+    	dragonfly.saveIMUData();
+	} else { dragonfly.loadIMUData(); }
   
 }
 
@@ -56,7 +54,9 @@ void loop(){
 	//dragonfly.displayReceiever();
   	
 	// Serial.println(dragonfly.strStatus());
-	Serial.println(dragonfly.transmitQuat());
+	dragonfly.transmitQuat();
+
+
 
 	blinkState = !blinkState;	   // to signify 1 control loop cycle
 	digitalWrite(LED_PIN, blinkState); // can be monitored on oscilloscope

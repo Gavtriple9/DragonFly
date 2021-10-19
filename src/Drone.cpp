@@ -1,8 +1,6 @@
 #include "Drone.h"
 
-DF::Drone::Drone(){
-    
-}
+DF::Drone::Drone(){}
 
 void DF::Drone::init(){
 
@@ -26,6 +24,9 @@ void DF::Drone::init(){
     Serial.println( imu.isConnected() ? "MPU9250 connection successful" : "MPU9250 connection failed");
     Serial.println( pressure.begin() ? "BMP180 connection successful" : "BMP180 connection failed");
 
+    // if triggered will cause drone to shutdown all motors immediately 
+    state.failSafe = false; 
+    
     Serial.println( "Attaching Motors" );
     motor1.attach(MOTOR_1_PIN);
     motor2.attach(MOTOR_2_PIN);
@@ -101,12 +102,15 @@ void DF::Drone::getUserCommand(){
 	}
 };
 
-String DF::Drone::transmitQuat(){
-    return state.orientation.toString(4);
+void DF::Drone::transmitQuat(){
+    Serial.println(state.orientation.toString(4));
 }
 
 void DF::Drone::update(float dt){
+
+    // collect readings from sensors
     updateReadings();
+
     // update lin_acc, vel, pos, & orientation
     state.orientation = DF::Quaternion(
         imu.getQuaternionW(),
@@ -114,10 +118,18 @@ void DF::Drone::update(float dt){
         imu.getQuaternionY(), 
         imu.getQuaternionZ()
     );
+    if (DEBUG_MODE) {
+        if ( abs(state.orientation.getX()) >= 0.35 || abs(state.orientation.getY()) >= 0.35 ) {
+            setAllMotors(0);
+            Serial.println("TOO FAR!");
+        }
+    }
+    // turn orientation quaternion into rotation matrix
     state.rotMat = DF::Matrix3D(state.orientation);
-    state.acc = (
-        state.rotMat*(DF::Vector3D(imu.getAccX(), imu.getAccY(), imu.getAccZ()) - DF::Vector3D(0,0,1))
-    )*9.81;
+    // use inverse matrix to solve for linear acc. 
+    state.rotMat.inverse();
+    state.acc = ((state.rotMat * DF::Vector3D(imu.getAccX(),imu.getAccY(),imu.getAccZ()))-DF::Vector3D(0,0,1))*9.81;
+    
     state.vel = DF::Vector3D( 
         state.vel.getX() + state.acc.getX()*dt,
         state.vel.getY() + state.acc.getY()*dt,

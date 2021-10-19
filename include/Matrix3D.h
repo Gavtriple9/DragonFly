@@ -10,23 +10,27 @@ namespace DF{
     public:
         Matrix3D();
         Matrix3D(Quaternion);
+        Matrix3D(Vector3D, Vector3D, Vector3D);
 
-        Vector3D getX(){return xComp;};
-        Vector3D getY(){return yComp;};
-        Vector3D getZ(){return zComp;};
+        Vector3D getR1(){return r1;};
+        Vector3D getR2(){return r2;};
+        Vector3D getR3(){return r3;};
 
-        void setX(Vector3D arg){xComp = arg;};
-        void setY(Vector3D arg){yComp = arg;};
-        void setZ(Vector3D arg){zComp = arg;};
+        void setR1(Vector3D arg){r1 = arg;};
+        void setR2(Vector3D arg){r2 = arg;};
+        void setR3(Vector3D arg){r3 = arg;};
 
         Vector3D operator*(Vector3D v);
 
         void display();
+        float getDet();
+        void transpose(void);
+        void inverse(void);
         
     private:
-        Vector3D xComp;
-        Vector3D yComp;
-        Vector3D zComp;
+        Vector3D r1;
+        Vector3D r2;
+        Vector3D r3;
     };
 }
 #endif
