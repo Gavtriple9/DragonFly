@@ -1,5 +1,6 @@
 #pragma once
 #include <Arduino.h>
+#include "app/state.hpp"
 
 namespace df
 {
@@ -28,6 +29,7 @@ namespace df
 
     private:
         static usb_serial_class logger;
+        static State state;
         /**
          * @brief Initializes the logging system.
          *

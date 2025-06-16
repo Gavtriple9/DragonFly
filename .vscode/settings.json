@@ -9,6 +9,8 @@
         "*.html": "html",
         "*.sigmf-meta": "json",
         "usb_device.h": "c",
-        "init.hpp": "c"
+        "init.hpp": "c",
+        "stdexcept": "cpp",
+        "cmath": "cpp"
     }
 }

@@ -3,6 +3,7 @@
 
 // Define static member variable
 usb_serial_class df::Application::logger;
+df::State df::Application::state;
 
 // ------------------------------ Public methods ----------------------------- //
 
