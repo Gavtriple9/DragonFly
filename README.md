@@ -1,32 +1,30 @@
-..  Copyright 2020-present PlatformIO <contact@platformio.org>
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-       http://www.apache.org/licenses/LICENSE-2.0
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
+# `Dragonfly`
 
-How to build PlatformIO based project
-=====================================
+> An embedded C++ drone control application.
 
-1. [Install PlatformIO Core](https://docs.platformio.org/page/core.html)
-2. Download [development platform with examples](https://github.com/platformio/platform-teensy/archive/develop.zip)
-3. Extract ZIP archive
-4. Run these commands:
+## Features
 
-```shell
-# Change directory to example
-$ cd platform-teensy/examples/zephyr-blink
+- **Real-time control**: Directly control drone motors and sensors.
+- **Embedded systems**: Designed for low-level hardware interaction.
+- **C++**: Utilizes modern C++ features for efficient performance.
+- **Cross-platform**: Compatible with various embedded systems.
 
-# Build project
-$ pio run
+## Installation
 
-# Upload firmware
-$ pio run --target upload
+1. Clone the repository:
 
-# Clean build files
-$ pio run --target clean
-```
+   ```bash
+   git clone git@github.com:Gavtriple9/DragonFly.git && cd DragonFly
+   ```
+
+2. Install `PlatformIO CLI` or `PlatformIO IDE`:
+
+   - Follow the [PlatformIO installation guide](https://docs.platformio.org/en/latest/core/installation/index.html).
+
+3. Open the project in PlatformIO IDE or use the CLI to build and upload:
+
+   ```bash
+    pio run --environment <BOARD_TYPE> --target upload
+   ```
+
+   Where `<BOARD_TYPE>` is the target board you are using (e.g., `teensy41`, `esp32dev`, `arduino_uno`, etc.).
