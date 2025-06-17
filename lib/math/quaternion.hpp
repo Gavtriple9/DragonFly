@@ -1,5 +1,14 @@
-namespace df_math
+namespace df
 {
+    /**
+     * @brief Quaternion class for representing and manipulating quaternions.
+     *
+     *  This class provides methods for quaternion arithmetic, including addition,
+     *  subtraction, multiplication, division, conjugation, normalization, and conversion
+     *  from axis-angle and Euler angles. Quaternions are used in 3D graphics and physics
+     *  for representing rotations and orientations in a compact and efficient manner.
+     *
+     */
     class Quaternion
     {
     public:

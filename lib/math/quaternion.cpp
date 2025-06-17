@@ -2,7 +2,7 @@
 #include <cmath>
 #include <stdexcept>
 
-namespace df_math
+namespace df
 {
     Quaternion &Quaternion::operator=(const Quaternion &other)
     {
