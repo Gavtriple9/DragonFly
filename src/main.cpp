@@ -1,5 +1,5 @@
-#include "app/init.hpp"
 #include <project_defines.h>
+#include "app/init.hpp"
 
 int main(void)
 {

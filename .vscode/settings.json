@@ -12,6 +12,8 @@
         "init.hpp": "c",
         "stdexcept": "cpp",
         "cmath": "cpp",
-        "complex": "cpp"
+        "complex": "cpp",
+        "bit": "cpp"
     }
 }
+

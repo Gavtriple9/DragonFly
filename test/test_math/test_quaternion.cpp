@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include "../../lib/math/quaternion.hpp"
 
-using namespace df;
+using namespace df::math;
 
 // Test basic quaternion construction
 TEST(QuaternionTest, DefaultConstructor)
