@@ -13,7 +13,8 @@
         "stdexcept": "cpp",
         "cmath": "cpp",
         "complex": "cpp",
-        "bit": "cpp"
+        "bit": "cpp",
+        "vector": "cpp"
     }
 }
 

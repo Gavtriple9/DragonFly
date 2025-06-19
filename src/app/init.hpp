@@ -1,21 +1,7 @@
 #pragma once
 
-#ifndef BUILD_ENV_NAME
-#error "Add -D BUILD_ENV_NAME=$PIOENV to platformio.ini build_flags"
-#else
-#define native_env 100
-#define teensy41 101
-#endif
-
-#if BUILD_ENV_NAME == native_env
-#include <spdlog/spdlog.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
-#include <spdlog/sinks/basic_file_sink.h>
-#include <memory>
-#else
-#include <Arduino.h>
-#endif
-
+#include <environment.h>
+#include <logging.h>
 #include "app/state.hpp"
 
 namespace df
@@ -44,11 +30,6 @@ namespace df
         void main_loop();
 
     private:
-#if BUILD_ENV_NAME == teensy41
-        static usb_serial_class logger;
-#elif BUILD_ENV_NAME == native_env
-        static std::shared_ptr<spdlog::logger> logger;
-#endif
         static State state;
         /**
          * @brief
