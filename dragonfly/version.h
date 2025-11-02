@@ -1,4 +1,6 @@
 #pragma once
+#include <array>
+#include <cstdio>
 
 namespace df
 {
@@ -8,7 +10,15 @@ namespace df
 
     inline const char *version_string()
     {
-        return "0.1.0";
+        // Build the version string once in static storage
+        static const std::array<char, 20> version = []()
+        {
+            std::array<char, 20> buffer{};
+            std::snprintf(buffer.data(), buffer.size(), "%d.%d.%d", MAJOR_VERSION, MINOR_VERSION, PATCH_VERSION);
+            return buffer;
+        }();
+
+        return version.data();
     }
 }
 

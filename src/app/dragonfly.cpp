@@ -1,26 +1,26 @@
 #include <dragonfly/config.h>
 #include <dragonfly/version.h>
+#include <dragonfly/environment.h>
+#include <dragonfly/logging.h>
 
-#include "init.hpp"
-
-df::State df::Application::state;
+#include <dragonfly/dragonfly.h>
 
 // ------------------------------ Public methods ----------------------------- //
 
-void df::Application::init()
+void df::Dragonfly::init()
 {
     setup_logging();
     setup_hardware();
     INFO("DragonFly v{} successfully initialized", DRAGONFLY_VERSION);
 }
 
-void df::Application::main_loop()
+void df::Dragonfly::main_loop()
 {
     INFO("Entering main application loop");
 
     for (int i = 0;; i++)
     {
-        // INFO("Main loop iteration: {}", i);
+        INFO("Main loop iteration: {}", i);
 
 // Simulate some work
 #if BUILD_ENV_NAME == teensy41
@@ -31,11 +31,11 @@ void df::Application::main_loop()
 
 // ------------------------------ Private methods ---------------------------- //
 
-void df::Application::setup_hardware()
+void df::Dragonfly::setup_hardware()
 {
 }
 
-void df::Application::setup_logging()
+void df::Dragonfly::setup_logging()
 {
     init_logger();
     DEBUG("Logging system initialized...");

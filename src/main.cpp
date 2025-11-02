@@ -1,12 +1,12 @@
-#include <dragonfly/error_codes.h>
-#include "app/init.hpp"
+#include <dragonfly/dragonfly.h>
+#include <dragonfly/errors/system.h>
 
 int main(void)
 {
 	// Initialize the application
-	df::Application app = df::Application();
-	app.init();
-	app.main_loop(); // blocking call
+	df::Dragonfly dragonfly = df::Dragonfly();
+	dragonfly.init();
+	dragonfly.main_loop(); // blocking call
 
 	// Return success code
 	return EXIT_SUCCESS;

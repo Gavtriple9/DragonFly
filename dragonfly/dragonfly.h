@@ -1,8 +1,5 @@
 #pragma once
-
-#include <dragonfly/environment.h>
-#include <dragonfly/logging.h>
-#include "app/state.hpp"
+#include "state.h"
 
 namespace df
 {
@@ -11,7 +8,7 @@ namespace df
      *
      * This class is responsible for initializing the application and running the main loop.
      */
-    class Application
+    class Dragonfly
     {
     public:
         /**
@@ -30,7 +27,8 @@ namespace df
         void main_loop();
 
     private:
-        static State state;
+        State state_;
+
         /**
          * @brief
          *

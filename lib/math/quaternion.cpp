@@ -73,12 +73,12 @@ namespace df
 
         Quaternion Quaternion::inverse() const
         {
-            float n = norm();
-            if (n == 0.0f)
+            float norm_sq = w * w + x * x + y * y + z * z;
+            if (norm_sq == 0.0f)
             {
                 throw std::invalid_argument("Cannot compute inverse of a zero quaternion");
             }
-            return conjugate() / (n * n);
+            return conjugate() / norm_sq;
         }
 
         Quaternion Quaternion::fromAxisAngle(float angle, float x, float y, float z)

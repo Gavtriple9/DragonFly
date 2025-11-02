@@ -1,0 +1,3 @@
+[submodule "lib/scope"]
+	path = lib/scope
+	url = git@github.com:Gavtriple9/scope.git
