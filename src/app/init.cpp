@@ -1,8 +1,7 @@
-#include <config.h>
-#include <version.h>
+#include <dragonfly/config.h>
+#include <dragonfly/version.h>
 
 #include "init.hpp"
-#include "hal/hal_gpio.hpp"
 
 df::State df::Application::state;
 
