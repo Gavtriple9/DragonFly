@@ -1,5 +1,17 @@
 #pragma once
-#include "state.h"
+
+#include <optional>
+#include <memory>
+#include "scope/scope.h"
+
+#include "sensors/altitude.h"
+#include "sensors/orientation.h"
+#include "sensors/arm.h"
+
+#include "drivers/barometer/synthetic.h"
+#include "drivers/gps/synthetic.h"
+#include "drivers/imu/synthetic.h"
+#include "drivers/input/synthetic.h"
 
 namespace df
 {
@@ -27,21 +39,34 @@ namespace df
         void main_loop();
 
     private:
-        State state_;
+        // Sensors
+        std::unique_ptr<OrientationSensor> orientation_sensor_;
+        std::optional<std::unique_ptr<AltitudeSensor>> altitude_sensor_;
+        std::unique_ptr<ArmSensor> arm_sensor_;
+
+        // State
+        // Translational state
+        scope::Vector3_f position_;
+        scope::Vector3_f velocity_;
+        scope::Vector3_f acceleration_;
+
+        // Rotational state
+        scope::Quaternion_f orientation_;
+        scope::Quaternion_f angular_velocity_;
+        scope::Quaternion_f angular_acceleration_;
 
         /**
-         * @brief
+         * @brief Sets up the logging subsystem.
          *
          *  This function sets up the serial communication for logging purposes.
          */
         void setup_logging();
 
         /**
-         * @brief Setup the connected hardware.
+         * @brief Setup the connected sensors.
          *
-         *  This function is a placeholder for hardware initialization logic.
-         *  Currently, it does not perform any operations.
+         * Sensors initialization logic.
          */
-        void setup_hardware();
+        void setup_sensors();
     };
 }

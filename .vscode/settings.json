@@ -8,13 +8,15 @@
         "*.scss.liquid": "liquid-scss",
         "*.html": "html",
         "*.sigmf-meta": "json",
+        "*.tex": "latex",
         "usb_device.h": "c",
         "init.hpp": "c",
         "stdexcept": "cpp",
         "cmath": "cpp",
         "complex": "cpp",
         "bit": "cpp",
-        "vector": "cpp"
+        "vector": "cpp",
+        "optional": "cpp"
     }
 }
 
