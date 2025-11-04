@@ -13,12 +13,25 @@ void df::Dragonfly::main_loop()
 
     for (int i = 0;; i++)
     {
-        INFO("Main loop iteration: {}", i);
 
 // Simulate some work
 #if BUILD_ENV_NAME == teensy41
         delay(1);
 #endif
+
+        scope::Quaternion_f orientation = orientation_sensor_->get_orientation();
+        float altitude;
+        if (altitude_sensor_.has_value())
+        {
+            altitude = altitude_sensor_.value()->get_altitude();
+        }
+        else
+        {
+            altitude = 0.0f;
+        }
+        bool armed = arm_sensor_->is_armed();
+
+        INFO("Status: \nOrientation: w: {:.3f}, x: {:.3f}, y: {:.3f}, z: {:.3f}\nAltitude: {:.3f}\nArmed: {}", orientation.w, orientation.x, orientation.y, orientation.z, altitude, armed);
     }
 }
 
@@ -56,6 +69,19 @@ void df::Dragonfly::setup_sensors()
     default:
         altitude_sensor_ = std::make_unique<df::SyntheticBarometer>();
         INFO("Altitude sensor: Mock");
+        break;
+    }
+
+    // Arm Sensor
+    switch (ARM_SENSOR)
+    {
+    case GPIO_PIN:
+        // Unimplemented
+        break;
+    case SYNTHETIC_SENSOR:
+    default:
+        arm_sensor_ = std::make_unique<df::SyntheticInput>();
+        INFO("Arm sensor: Mock");
         break;
     }
 }

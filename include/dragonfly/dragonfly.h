@@ -4,14 +4,8 @@
 #include <memory>
 #include "scope/scope.h"
 
-#include "sensors/altitude.h"
-#include "sensors/orientation.h"
-#include "sensors/arm.h"
-
-#include "drivers/barometer/synthetic.h"
-#include "drivers/gps/synthetic.h"
-#include "drivers/imu/synthetic.h"
-#include "drivers/input/synthetic.h"
+#include "sensors/sensors.h"
+#include "drivers/drivers.h"
 
 namespace df
 {
