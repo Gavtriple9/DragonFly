@@ -19,19 +19,7 @@ void df::Dragonfly::main_loop()
         delay(1);
 #endif
 
-        scope::Quaternion_f orientation = orientation_sensor_->get_orientation();
-        float altitude;
-        if (altitude_sensor_.has_value())
-        {
-            altitude = altitude_sensor_.value()->get_altitude();
-        }
-        else
-        {
-            altitude = 0.0f;
-        }
-        bool armed = arm_sensor_->is_armed();
-
-        INFO("Status: \nOrientation: w: {:.3f}, x: {:.3f}, y: {:.3f}, z: {:.3f}\nAltitude: {:.3f}\nArmed: {}", orientation.w, orientation.x, orientation.y, orientation.z, altitude, armed);
+        update_state();
     }
 }
 
@@ -84,6 +72,26 @@ void df::Dragonfly::setup_sensors()
         INFO("Arm sensor: Mock");
         break;
     }
+}
+
+void df::Dragonfly::update_state()
+{
+
+    scope::Quaternion_f orientation = orientation_sensor_->get_orientation();
+    float altitude;
+    if (altitude_sensor_.has_value())
+    {
+        altitude = altitude_sensor_.value()->get_altitude();
+    }
+    else
+    {
+        altitude = 0.0f;
+    }
+    bool armed = arm_sensor_->is_armed();
+
+    INFO("Orientation: w: {:.3f}, x: {:.3f}, y: {:.3f}, z: {:.3f}", orientation.w, orientation.x, orientation.y, orientation.z);
+    INFO("Altitude: {:.3f}", altitude);
+    INFO("Armed: {}", armed);
 }
 
 void df::Dragonfly::setup_logging()

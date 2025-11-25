@@ -62,5 +62,12 @@ namespace df
          * Sensors initialization logic.
          */
         void setup_sensors();
+
+        /**
+         * @brief Updates the sensor readings.
+         *
+         * This function reads data from the connected sensors and updates the internal state accordingly.
+         */
+        void update_state();
     };
 }
